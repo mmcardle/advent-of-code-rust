@@ -9,4 +9,4 @@ edition = "2021"
 
 [[bin]]
 name = "advent-of-code-rust"
-path = "main.rs"
+path = "src/main.rs"
