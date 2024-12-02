@@ -10,3 +10,16 @@ edition = "2021"
 [[bin]]
 name = "advent-of-code-rust"
 path = "main.rs"
+
+[[bin]]
+name = "day1"
+path = "2024/day1/main.rs"
+
+[[bin]]
+name = "day1_part2"
+path = "2024/day1/part2.rs"
+
+[[bin]]
+name = "day2"
+path = "2024/day2/main.rs"
+
