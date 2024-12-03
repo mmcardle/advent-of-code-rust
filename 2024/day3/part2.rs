@@ -20,18 +20,11 @@ fn read_file(filename: &str) -> String {
     contents
 }
 
-fn parse_str_asi32(input: &str) -> Vec<i32> {
-    input
-        .split_whitespace()
-        .map(|x| x.parse::<i32>().unwrap())
-        .collect()
-}
-
 fn parse_input(input: &str) -> Result<(), Box<dyn std::error::Error>> {
     // parse 2 integers on each line
 
     let re = Regex::new(
-        r"(?<conditional1>)(mul)\((?<one>[0-9]+),(?<two>[0-9]+)\)|(?<conditional2>(do|don't))\(\)"
+        r"(?<instruction>)(mul)\((?<one>[0-9]+),(?<two>[0-9]+)\)|(?<conditional>(do|don't))\(\)"
     ).unwrap();
     // 'm' is a 'Match', and 'as_str()' returns the matching part of the haystack.
     let dates: Vec<&str> = re.find_iter(input).map(|m| m.as_str()).collect();
@@ -39,20 +32,37 @@ fn parse_input(input: &str) -> Result<(), Box<dyn std::error::Error>> {
     println!("{:?}", dates);
 
     let mut total = 0;
+    let mut on = true;
 
     dates.iter().for_each(|date| {
         let caps = re.captures(date).unwrap();
 
-        let (_, [year, month, day]) = caps.extract();
-        let conditional = caps.name("conditional1").unwrap().as_str();
+        let instruction = caps.name("instruction");
+        let conditional = caps.name("conditional");
 
-        //let one = caps.name("one").unwrap().as_str();
-        //let two = caps.name("two").unwrap().as_str();
-        //let num1 = one.parse::<i32>().unwrap();
-        //let num2 = two.parse::<i32>().unwrap();
-        //let sum = num1 * num2;
-        //println!("instruction {}: {} * {} = {}", conditional , num1, num2, sum);
-        //total += sum;
+        // check if conditional1 is not None
+        if instruction.is_some() {
+            let one = caps.name("one").unwrap().as_str();
+            let two = caps.name("two").unwrap().as_str();
+            let num1 = one.parse::<i32>().unwrap();
+            let num2 = two.parse::<i32>().unwrap();
+            let sum = num1 * num2;
+            println!("instruction {}: {} * {} = {}", instruction.unwrap().as_str(), num1, num2, sum);
+            if on {
+                total += sum;
+            }
+        }
+
+        // check if conditional is not None
+        if conditional.is_some() {
+            let cond2 = conditional.unwrap().as_str();
+            println!("instruction: {}", cond2);
+            if cond2 == "do" {
+                on = true;
+            } else if cond2 == "don't" {
+                on = false;
+            }
+        }
     });
 
     println!("Total: {}", total);
