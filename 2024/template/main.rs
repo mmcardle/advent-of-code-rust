@@ -1,8 +1,3 @@
-fn main() {
-    println!("Hello, world!");
-}
-
-
 use std::fs;
 use std::env;
 
