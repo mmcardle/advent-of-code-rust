@@ -1,6 +1,7 @@
 use std::fs;
 use std::env;
 use std::str::FromStr;
+use itertools::Itertools; // 0.8.2
 
 
 fn get_filename_from_args() -> String {
@@ -19,6 +20,16 @@ fn read_file(filename: &str) -> String {
 
     println!("Found text:\n{}", contents);
     contents
+}
+
+fn check_pair_follows_rules(pair: (u32, u32), rules: &Vec<(u32, u32)>) -> bool {
+    let mut found = false;
+    rules.iter().for_each(|rule| {
+        if rule == &pair {
+            found = true;
+        }
+    });
+    found
 }
 
 fn parse_input(input: &str) -> () {
@@ -71,29 +82,9 @@ fn parse_input(input: &str) -> () {
     let mut invalid_total = 0;
 
     pages.iter_mut().for_each(|page| {
-        println!("{:?}", page);
+        println!("\nPAGE {:?}", page);
 
-        let mut valid = true;
-        
-        for i in 0..page.len() -1 {
-            
-            let pair = (page[i], page[i+1]);
-
-            // find pair n rules
-            let mut found = false;
-            the_rules.iter().for_each(|rule| {
-                if rule == &pair {
-                    found = true;
-                }
-            });
-
-            valid = valid && found;
-
-            if !found {
-            } else {
-                // println!("    Valid pair: {:?}", pair);
-            }
-        }
+        let valid = check_page_follows_rules(page, &the_rules);
 
         if valid {
             let middlevalue = page.len() / 2;
@@ -101,14 +92,60 @@ fn parse_input(input: &str) -> () {
             total += middle;
             println!("Valid page: {:?} +{}", page, middle);
         } else {
+            
+            println!("Page started as: {:?}", page);
 
-            // find the first permutation of this page that passes all the rules
+            let mut now_valid = false;
+            let mut counter = 0;
+
+            while !now_valid {
+                for i in 0..page.len() -1 {
+                    let pair = (page[i], page[i+1]);
+                    let found = check_pair_follows_rules(pair, &the_rules);
+                    if !found {
+                        // swap values
+                        let temp = page[i];
+                        page[i] = page[i+1];
+                        page[i+1] = temp;
+                        println!("Swapped {} and {}", page[i], page[i+1]);
+                        println!("   Page is now: {:?}", page);
+                    }
+                }
+
+                now_valid = check_page_follows_rules(page, &the_rules);
+                counter += 1;
+                if counter > 100 {
+                    break;
+                }
+            }
+
+            let end_page_valid = check_page_follows_rules(page, &the_rules);
 
             let middlevalue = page.len() / 2;
             let middle = page[middlevalue];
             invalid_total += middle;
-            println!("InValid page: {:?} +{}", page, middle);
+
+            println!("Page ended as: {:?} which is {}", page, end_page_valid);
+
+            /*
+            // Memory intensive
+            for perm in page.iter().permutations(page.len()).unique() {
+                let mut perm_vec: Vec<u32> = perm.into_iter().copied().collect();
+                let perm_is_valid = check_page_follows_rules(&mut perm_vec, &the_rules);
+                if perm_is_valid {
+                    println!("PERM VALID: {:?}", perm_vec);
+                    invalid_total += perm_vec[perm_vec.len() / 2];
+                    break;
+                }
+            }
+            */
+
+
+
+            println!("InValid page: {:?}", page);
         }
+
+        println!("\n");
 
     });
 
@@ -116,6 +153,18 @@ fn parse_input(input: &str) -> () {
     println!("Invalid Total: {}", invalid_total);
 
     ()
+}
+
+fn check_page_follows_rules(page: &mut Vec<u32>, the_rules: &Vec<(u32, u32)>) -> bool {
+    let mut valid = true;
+    for i in 0..page.len() -1 {
+    
+        let pair = (page[i], page[i+1]);
+        let found = check_pair_follows_rules(pair, &the_rules);
+        valid = valid && found;
+
+    }
+    valid
 }
 
 fn main() {
