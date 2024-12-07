@@ -1,3 +1,3 @@
 
 run:
-	RUST_BACKTRACE=1 cargo run --release --bin $(ARGS)
+	RUST_BACKTRACE=full cargo run --release --bin $(ARGS)
