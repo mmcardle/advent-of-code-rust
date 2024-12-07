@@ -85,33 +85,16 @@ fn process_total_and_numbers(total: i64, numbers: Vec<i64>) -> i64 {
 
     let items = vec![MULTIPLY, ADD, CONCAT];
 
-    let xxx = variations_up_to_length(&items, numbers_length -1 );
+    let variations = variations_up_to_length(&items, numbers_length -1 );
 
     let mut result = 0;
-    xxx.for_each(|operations|{
-        //println!("XXX {:?}", operations);
-        //println!("{:?} on {:?}", &operations, &numbers);
+    variations.for_each(|operations|{
         let possible_total = calculate(&numbers, operations);
         if possible_total == total {
-            //println!("{} == {}", total, possible_total);
             result = total;
         }
     });
     
-    //items.iter().for_each(|op| {
-    //    println!("{}", op)
-    //});
-
-    /*
-    for operations in items.iter().permutations(numbers_length - 1) {
-        println!("{:?} on {:?}", &operations, &numbers);
-        let possible_total = calculate(&numbers, operations);
-        if possible_total == total {
-            println!("{} == {}", total, possible_total);
-            return total;
-        }
-    }*/
-
     result
 }
 
