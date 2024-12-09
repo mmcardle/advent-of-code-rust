@@ -12,40 +12,52 @@ fn get_filename_from_args() -> String {
 
 
 fn read_file(filename: &str) -> String {
-
     let contents = fs::read_to_string(filename)
         .expect("Should have been able to read the file");
-
     println!("Found text:\n{}", contents);
     contents
 }
 
-fn parse_input(input: &str) -> Vec<i64>{
+fn parse_input(input: &str) -> Vec<(usize, i64, bool)>{
+
+    let mut betterdisk = Vec::new();
+
     let first_line = input.lines().next().unwrap();
-    let char_list: Vec<i64> = first_line.split("").filter(|c| {
+    let disky: Vec<(usize, i64, bool)> = first_line.split("").filter(|c| {
         c.len() == 1
-    }).map(| char| {
+    }).enumerate().map(|(index, char) | {
         let i = char.parse::<i64>().unwrap();
-        i
+        for _ in 0..i {
+            if index % 2 == 0 {
+                betterdisk.push((index/2, i, true));
+            } else {
+                betterdisk.push((0, 0, false));
+            }
+        }
+        (index, i, i % 2 != 0)
     }).collect();
-    char_list
+    betterdisk
 }
 
-fn print_disk_map(disk_map: Vec<i64>) -> String {
+fn print_disk_map(disk_map: Vec<(usize, i64, bool)>) -> String {
     let mut s: String = String::from("");
     for i in 0..disk_map.len() {
-        if i % 2 == 0 {
-            for _ in 0..disk_map[i] {
+        let item = disk_map[i];
+        if item.2 {
+            s.push_str(&format!("{}", item.0));
+            /*for _ in 0..disk_map[i].1 {
                 s.push_str(&format!("{}", i/2));
-            }
+            }*/
         } else {
-            for _ in 0..disk_map[i] {
+            s.push_str(&format!("."));
+            /*for _ in 0..disk_map[i].1 {
                 s.push_str(&format!("."));
-            }
+            }*/
         }
     }
     s
 }
+
 
 fn move_single_sector_to_end(mut disk_map: String) -> String {
 
@@ -53,13 +65,13 @@ fn move_single_sector_to_end(mut disk_map: String) -> String {
     let last_digit = disk_map.rfind(char::is_alphanumeric).unwrap();
     let first_dot =  disk_map.find(".").unwrap();
 
-    if last_digit < first_dot {
+    if last_digit <= first_dot {
 
         // Disk is good
 
         println!("{}", &disk_map);
 
-        let mut iter = disk_map.chars().enumerate();
+        let iter = disk_map.chars().enumerate();
         let mut total = 0;
 
         iter.for_each(|f| {
@@ -67,7 +79,7 @@ fn move_single_sector_to_end(mut disk_map: String) -> String {
             let size = f.1;
             if size != '.' {
                 let size_int = size.to_digit(RADIX).unwrap();
-                let new_total = total + disk_id * (size_int as usize);
+                let new_total = total + (disk_id * (size_int as usize));
                 println!("{} + {} * {} = {}", total, disk_id, size_int, new_total);
                 total = new_total;
             }
@@ -88,20 +100,87 @@ fn move_single_sector_to_end(mut disk_map: String) -> String {
     disk_map
 }
 
+
+
+fn format_disk(mut disk: Vec<(usize, i64, bool)>) -> (bool, Vec<(usize, i64, bool)>) {
+        
+    let last_disk_index = disk.iter().rposition(|(_, _, even)| {
+        *even 
+    }).unwrap();
+    //println!("Last disk item {} = {:?}", last_disk_index,  disk[last_disk_index]);
+
+    let first_space_index = disk.iter().position(|(_, _, even)| {
+        *even == false
+    }).unwrap();
+    //println!("First space to fill {} = {:?}", first_space_index , disk[first_space_index]);
+
+    if (last_disk_index < first_space_index) {
+        return (true, disk);
+    }
+
+    // swap the two
+    //let mut disk = disk.clone();
+    disk.swap(last_disk_index, first_space_index);
+
+    //disk[last_disk_index].1 -= 1;
+    //disk[first_space_index].1 -= 1;
+    //disk.insert(first_space_index, (disk[last_disk_index].0, 1, true));
+
+    //println!("Disk Map New: {:?}", disk);
+
+    //println!("{}", print_disk_map(disk.clone()));
+
+    return (false, disk);
+
+}
+
 fn main() {
     let content = read_file(get_filename_from_args().as_str());
 
-    let disk_map = parse_input(content.as_str());    
-    let mut formatted_disk_map = print_disk_map(disk_map);
-    println!("{}", formatted_disk_map);
+    let mut disk_map = parse_input(content.as_str());
+    println!("Disk Map: {:?}", disk_map);
+    
+    //let mut formatted_disk_map = print_disk_map(disk_map.clone());
+    //println!("{}", formatted_disk_map);
 
-    let maxy: i64 = i64::MAX;
-     while true {
+    let mut counter = 0;
+
+    println!("{}", print_disk_map(disk_map.clone()));
+
+    loop {
+        let (formatted, new_disk_map) = format_disk(disk_map.clone());
+        disk_map = new_disk_map.clone();
+        if formatted  {
+            println!("{}", print_disk_map(new_disk_map.clone()));
+            break;
+        }
+        counter += 1;
+    }
+
+    println!("{:?}", disk_map.clone());
+
+    let mut total = 0;
+
+    for i in 0..disk_map.len() {
+        let item = disk_map[i];
+        if item.2 == true {
+            println!("{} :: {} + {} * {} = {}  {:?}", i, total, item.0, i, total + i * item.0, item);
+            total += i * item.0;
+        }
+    }
+
+    println!("LEN {}", disk_map.len());
+    println!("Total {}", total);
+
+    /*
+
+    loop {
         formatted_disk_map = move_single_sector_to_end(formatted_disk_map.clone());
         if formatted_disk_map == "" {
             break;
         }
         //println!("{}", formatted_disk_map);
     }
+    */
 
 }

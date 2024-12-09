@@ -2,7 +2,6 @@ use std::collections::HashSet;
 use std::fs;
 use std::env;
 use std::collections::HashMap;
-use std::panic::Location;
 use itertools::Itertools; // 0.8.2
 
 fn get_filename_from_args() -> String {
