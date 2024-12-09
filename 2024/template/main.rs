@@ -20,7 +20,7 @@ fn read_file(filename: &str) -> String {
     contents
 }
 
-fn parse_input(input: &str) -> Vec<Vec<str>> {
+fn parse_input(input: &str) -> Vec<Vec<&str>> {
     // parse 2 integers on each line
 
     
