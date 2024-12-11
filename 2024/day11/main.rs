@@ -11,13 +11,16 @@ fn get_filename_from_args() -> String {
     args[1].clone()
 }
 
+fn format_str_as_red(s: &str) -> String {
+    format!("\x1b[31m{}\x1b[0m", s)
+}
 
 fn read_file(filename: &str) -> String {
 
     let contents = fs::read_to_string(filename)
         .expect("Should have been able to read the file");
 
-    println!("Found text:\n{}", contents);
+    //println!("Found text:\n{}", contents);
     contents
 }
 
@@ -52,27 +55,6 @@ fn blink(stones: Vec<&str>) -> Vec<&str> {
     new_stones
 }
 
-fn blink_length(blinks: usize, stones: Vec<&str>, cache: &HashMap<&str, usize>) -> usize {
-    let mut total = 0;
-
-    if blinks == 0 {
-        return total;
-    }
-
-    for stone in stones {
-        if cache.contains_key(stone) {
-            total = total + cache.get(stone).unwrap();
-        } else {
-            total = total + blink_length(blinks - 1, process_stone(stone), cache);
-        }
-    }
-
-    println!("Total for {:?} = {}", stones, total);
-
-    total
-
-}
-
 fn parse_input(input: &str) -> Vec<&str> {
     let mut parsed_input = Vec::new();
     for line in input.lines() {
@@ -82,24 +64,91 @@ fn parse_input(input: &str) -> Vec<&str> {
     }
     parsed_input
 }
+fn format_str_as_green(s: &str) -> String {
+    format!("\x1b[32m{}\x1b[0m", s)
+}
+fn string_of_length_N(n: usize) -> String {
+    let mut s = String::new();
+    for _ in 0..n*2 {
+        s.push(' ');
+    }
+    s
+}
+
+fn blink_length<'a>(blinks: usize, stones: Vec<&'a str>, cache: &mut HashMap<&'a str, usize>) -> usize {
+    let mut total = 0;
+
+    let padding = string_of_length_N(blinks);
+
+    if blinks == 0 {
+        //println!("{} Base case for {:?} = {}", padding, stones.clone(), stones.len());
+        return stones.len();
+    }
+
+    for stone in &stones {
+        //println!("{} Round {} Processing stone {:?}", padding, blinks, stone);
+        if cache.contains_key(stone) {
+            let red_cache = format_str_as_red("Cache hit");
+            let cached_value = cache.get(stone).unwrap();
+            //println!("{} {} for {:?} is {}", padding, red_cache, stone, cached_value);
+            total += *cached_value;
+            //return *cached_value;
+        } else {
+            ////println!("Cache miss for {:?}", stone);
+            let new_stones = process_stone(stone);
+            ////println!("New stones {:?} from {}", new_stones, stone);
+            let this_total = blink_length(blinks - 1, new_stones , cache);
+            total += this_total;
+            let cache_green = format_str_as_green("Cache insert");
+            //println!("{} {} -> {} for stone {:?}", padding, cache_green, this_total, stone);
+            //cache.insert(stone, this_total);
+            //return this_total
+        }
+    }
+
+    //println!("{} Total for {:?} = {}", padding , stones.clone(), total);
+
+    total
+
+}
+
+
 
 fn main() {
     let content = read_file(get_filename_from_args().as_str());
 
-    let mut stones = parse_input(content.as_str());    
+    let stones = parse_input(content.as_str());    
 
-    println!("{:?}", stones);
-
+    
     // part2 
-    let blinks = 6;
+    
+    //let debug1 = blink_length(25, Vec::from(["125", "17"]), &mut HashMap::new());
+    //println!("Total DEBUG {}", debug1);
+    
+    let debug2 = blink_length(75, Vec::from(stones), &mut HashMap::new());
+    println!("Total DEBUG {}", debug2);
 
-    let total2 = blink_length(blinks, stones.clone(), &HashMap::new());
+    return;
+    
+    println!("{:?}", stones);
+    
+    let blinks = 6;
+    let debug2 = blink_length(6, Vec::from(["17"]), &mut HashMap::new());
+    println!("Total DEBUG 2 {}", debug2);
+
+    let debug3 = blink_length(6, Vec::from(["125", "17"]), &mut HashMap::new());
+    println!("Total DEBUG 2 {}", debug3);
+
+    let mut cache = HashMap::new();
+    let total2 = blink_length(blinks, stones.clone(), &mut cache);
 
     println!("Total pArt 2 {}", total2);
     
+    /*
     for _ in 0..blinks {
         stones = blink(stones.clone());
     }
     println!("Result {}", &stones.len());
+    */
 
 }
