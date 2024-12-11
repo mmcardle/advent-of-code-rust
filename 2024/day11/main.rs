@@ -49,8 +49,7 @@ fn process_stone(stone: &str) -> Vec<&str> {
 }
 
 
-
-fn blink_length(blinks: usize, stones: Vec<&str>, cache: &mut HashMap<String, usize>) -> usize {
+fn blink_times(blinks: usize, stones: Vec<&str>, cache: &mut HashMap<String, usize>) -> usize {
     let mut total = 0;
     let cache_key_suffix = stones.join(",");
     let cache_prefix= format!("{:?}::", blinks);
@@ -66,18 +65,18 @@ fn blink_length(blinks: usize, stones: Vec<&str>, cache: &mut HashMap<String, us
 
     for stone in &stones {
         let new_stones = process_stone(stone);
-        let this_total = blink_length(blinks - 1, new_stones , cache);
+        let this_total = blink_times(blinks - 1, new_stones , cache);
         total += this_total;
     }
 
     cache.insert(cache_key.clone(), total);
-    total
+    return total;
 }
 
 
 fn main() {
     let content = read_file(get_filename_from_args().as_str());
     let stones = parse_input(content.as_str());    
-    let debug1 = blink_length(300, Vec::from(stones), &mut HashMap::new());
-    println!("Total DEBUG {}", debug1);
+    let total = blink_times(300, Vec::from(stones), &mut HashMap::new());
+    println!("Total {}", total);
 }
