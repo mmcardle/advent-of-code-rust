@@ -2,7 +2,6 @@ use std::collections::HashMap;
 use std::fs;
 use std::env;
 
-
 fn get_filename_from_args() -> String {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
@@ -12,12 +11,19 @@ fn get_filename_from_args() -> String {
 }
 
 fn read_file(filename: &str) -> String {
-
     let contents = fs::read_to_string(filename)
         .expect("Should have been able to read the file");
-
     //println!("Found text:\n{}", contents);
     contents
+}
+fn parse_input(input: &str) -> Vec<&str> {
+    let mut parsed_input = Vec::new();
+    for line in input.lines() {
+        line.split_whitespace().for_each(|item| {
+            parsed_input.push(item);
+        });
+    }
+    parsed_input
 }
 
 fn process_stone(stone: &str) -> Vec<&str> {
@@ -34,22 +40,15 @@ fn process_stone(stone: &str) -> Vec<&str> {
         let rhs_str = Box::leak(rhs.parse::<i64>().unwrap().to_string().into_boxed_str()) as &str;
         return Vec::from([lhs_str, rhs_str])
     } else {
-        //If none of the other rules apply, the stone is replaced by a new stone; the old stone's number multiplied by 2024 is engraved on the new stone.
+        //If none of the other rules apply, the stone is replaced by a new stone; 
+        // the old stone's number multiplied by 2024 is engraved on the new stone.
         let stone_int = stone.parse::<i64>().unwrap();
         let new_stone = stone_int * 2024;
         return Vec::from([Box::leak(new_stone.to_string().into_boxed_str()) as &str])
     }
 }
 
-fn parse_input(input: &str) -> Vec<&str> {
-    let mut parsed_input = Vec::new();
-    for line in input.lines() {
-        line.split_whitespace().for_each(|item| {
-            parsed_input.push(item);
-        });
-    }
-    parsed_input
-}
+
 
 fn blink_length(blinks: usize, stones: Vec<&str>, cache: &mut HashMap<String, usize>) -> usize {
     let mut total = 0;
@@ -79,6 +78,6 @@ fn blink_length(blinks: usize, stones: Vec<&str>, cache: &mut HashMap<String, us
 fn main() {
     let content = read_file(get_filename_from_args().as_str());
     let stones = parse_input(content.as_str());    
-    let debug1 = blink_length(75, Vec::from(stones), &mut HashMap::new());
+    let debug1 = blink_length(300, Vec::from(stones), &mut HashMap::new());
     println!("Total DEBUG {}", debug1);
 }
