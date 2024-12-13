@@ -43,14 +43,18 @@ fn format_str_as_green(s: &str) -> String {
 }
 
 
-fn prcoess_grid(grid: Vec<Vec<char>>) {
+fn prcoess_grid(grid: Vec<Vec<char>>) -> usize{
 
     let unique_chars_in_grid = grid.iter().flatten().copied().collect::<HashSet<char>>();
     println!("Unique chars in grid: {:?}", unique_chars_in_grid);
 
+    let mut total_cost = 0;
+
     unique_chars_in_grid.iter().for_each(|c| {
-        process_grid_char(grid.clone(), *c);
+        total_cost += process_grid_char(grid.clone(), *c);
     });
+
+    return total_cost;
 
 }
 
@@ -72,10 +76,14 @@ fn adjacent_points(grid: Vec<Vec<char>>, point: (usize, usize)) -> Vec<(usize, u
     return points;
 }
 
-fn process_grid_char(grid: Vec<Vec<char>>, c: char) -> usize {
-    println!("\nProcessing grid for char: {}", c);
-    let mut points= Vec::new();
+fn print_formatted_grid(grid: &Vec<Vec<char>>, c: char, points: &mut Vec<(usize, usize)>) {
+    print!("  ",);
+    for row in 0..grid[0].len() {
+        print!(" {} ", row);
+    }
+    println!();
     for (i, row) in grid.iter().enumerate() {
+        print!("{} ", i);
         for (j, &cell) in row.iter().enumerate() {
             if cell == c {
                 points.push((i, j));
@@ -86,24 +94,38 @@ fn process_grid_char(grid: Vec<Vec<char>>, c: char) -> usize {
         }
         println!();
     }
+    println!();
+}
+
+fn process_grid_char(grid: Vec<Vec<char>>, c: char) -> usize {
+    println!("\nProcessing grid for char: {}", c);
+    let mut points= Vec::new();
+    print_formatted_grid(&grid, c, &mut points);
+
+    let mut total_fences = 0;
     
-    println!("Points: {:?}", points);
+    //println!("Points: {:?}", points);
     points.iter().for_each(|p| {
         let mut fences = 4;
         let adj_points = adjacent_points(grid.clone(), *p);
-        println!("Adjacent points for {:?}: {:?}", p, adj_points);
-        if adj_points.iter().any(|adj_p| {
-            let (i, j) = adj_p;
-            grid[*i][*j] == c
-        }) {
-            fences -= 1;
-        } 
-        println!("{:?} has {} fences", p, fences);
+        for p in adj_points.iter() {
+            if grid[p.0][p.1] == c {
+                fences -= 1;
+            }
+        }
+        println!("Adjacent points for {:?}: {:?} == permieter {}", p, adj_points, fences);
+        total_fences += fences;
     });
 
 
-    return 0;
+    let area = points.len();
+    let cost = total_fences * points.len();
+
+    println!("{} has {} fences and area of {} == {}", c, total_fences, area, cost);
+
+    return cost;
 }
+
 
 
 fn main() {
@@ -111,8 +133,8 @@ fn main() {
 
     let grid = parse_input(content.as_str());    
 
-    print_grid(&grid);
+    let total_fences = prcoess_grid(grid);
 
-    prcoess_grid(grid);
+    println!("{:?}", total_fences)
 
 }
