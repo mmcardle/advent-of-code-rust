@@ -2,6 +2,8 @@ use std::collections::HashSet;
 use std::fs;
 use std::env;
 
+use crate::lattice::Lattice;
+
 
 fn get_filename_from_args() -> String {
     let args: Vec<String> = env::args().collect();
@@ -131,7 +133,9 @@ fn process_grid_char(grid: Vec<Vec<char>>, c: char) -> usize {
 fn main() {
     let content = read_file(get_filename_from_args().as_str());
 
-    let grid = parse_input(content.as_str());    
+    let grid = parse_input(content.as_str());
+
+    let lattice = Lattice::lattice_map(&grid, |c| *c);
 
     let total_fences = prcoess_grid(grid);
 
