@@ -18,7 +18,7 @@ fn parse_input(input: &str) -> Vec<Vec<String>> {
         .collect();
 }
 
-fn create_regions(m: HashMap<Lattice, String>) {
+fn create_regions(m: HashMap<Lattice, String>) -> Vec<(String, HashSet<Lattice>)>{
     /*
     def create_regions(m):
         def fill(m: defaultdict, region: set, p: lattice):
@@ -62,7 +62,7 @@ fn create_regions(m: HashMap<Lattice, String>) {
     }
 
     let mut left: HashSet<Lattice> = m.keys().cloned().collect();
-    let mut regions: Vec<(&String, HashSet<Lattice>)> = Vec::new();
+    let mut regions: Vec<(String, HashSet<Lattice>)> = Vec::new();
 
     let mut counter = 0;
 
@@ -81,7 +81,7 @@ fn create_regions(m: HashMap<Lattice, String>) {
         // Remove all in regions from left
         left = left.difference(&region).cloned().collect();
         
-        regions.push((val, region));
+        regions.push((val.clone(), region));
 
         if counter > 100 {
             panic!("o no")
@@ -90,22 +90,30 @@ fn create_regions(m: HashMap<Lattice, String>) {
         counter += 1;
     }
 
-    for region in regions {
-        println!("{:?}", region)
-    }
+    regions
 
 
 }
 
-fn part2(data: Vec<Vec<String>>) -> i32 {
+fn total_price(data: Vec<Vec<String>>) -> usize {
     let m = Lattice::lattice_map(&data, |x| x.to_string());
 
     println!("{:?}", m);
 
     let regions = create_regions(m);
-    //regions.iter().map(|(_, region)| price(region)).sum();
+    
+    let mut total = 0;
+    for region in regions {
+        println!("{:?}", region);
+        total += price(&region.1);
+    }
 
-    0
+    total
+}
+
+fn price(region: &HashSet<Lattice>) -> usize {
+    let area = region.len();
+    area
 }
 
 fn get_filename_from_args() -> String {
@@ -128,7 +136,9 @@ fn main() {
 
     print_grid(&data);
 
-    let res = part2(data);
+    let res = total_price(data);
+
+    println!("Result: {}", res);
 }
 
 fn print_grid(data: &Vec<Vec<String>>) {
