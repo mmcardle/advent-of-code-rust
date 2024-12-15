@@ -13,15 +13,6 @@ impl Point {
     pub fn new(x: i32, y: i32) -> Self {
         Self { x, y }
     }
-
-    pub fn across(&self) -> Vec<Self> {
-        vec![
-            Point { x: self.x + 1, y: self.y },
-            Point { x: self.x - 1, y: self.y },
-            Point { x: self.x, y: self.y + 1 },
-            Point { x: self.x, y: self.y - 1 },
-        ]
-    }
 }
 
 #[derive(Hash, Debug, Clone, Copy, PartialEq)]
@@ -50,6 +41,22 @@ impl Lattice {
     pub fn is_imag(&self) -> bool {
         self.real == 0
     }
+
+    pub fn direction(&self, other: &Self) -> Lattice {
+        let diff = *other - *self;
+        let mut result = Lattice::new(0, 0);
+        if diff.real > 0 {
+            result.real = 1;
+        } else if diff.real < 0 {
+            result.real = -1;
+        }
+        if diff.imag > 0 {
+            result.imag = 1;
+        } else if diff.imag < 0 {
+            result.imag = -1;
+        }
+        result
+    } 
 
     pub fn to_point(&self) -> Point {
         Point {
@@ -191,14 +198,14 @@ impl Eq for Lattice {
     fn assert_receiver_is_total_eq(&self) {}
 }
 
-const N: Lattice = Lattice::new(0, -1);
-const S: Lattice = Lattice::new(0, 1);
-const E: Lattice = Lattice::new(1, 0);
-const W: Lattice = Lattice::new(-1, 0);
-const NE: Lattice = Lattice::new(1, -1);
-const NW: Lattice = Lattice::new(-1, -1);
-const SE: Lattice = Lattice::new(1, 1);
-const SW: Lattice = Lattice::new(-1, 1);
+pub const N: Lattice = Lattice::new(0, -1);
+pub const S: Lattice = Lattice::new(0, 1);
+pub const E: Lattice = Lattice::new(1, 0);
+pub const W: Lattice = Lattice::new(-1, 0);
+pub const NE: Lattice = Lattice::new(1, -1);
+pub const NW: Lattice = Lattice::new(-1, -1);
+pub const SE: Lattice = Lattice::new(1, 1);
+pub const SW: Lattice = Lattice::new(-1, 1);
 
 // const ROT_90_CW: Lattice = Lattice::new(0, 1);
 // const ROT_90_CCW: Lattice = Lattice::new(0, -1);
