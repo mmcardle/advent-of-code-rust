@@ -1,6 +1,5 @@
 use std::fs;
 use std::env;
-use std::os::linux::raw;
 use std::usize;
 
 use itertools::Itertools;
@@ -25,7 +24,7 @@ fn read_file(filename: &str) -> String {
     contents
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 struct Button {
   x: usize,
   y: usize,
@@ -57,14 +56,52 @@ struct Competition {
   target: Target,
 }
 
+
 impl Competition {
   pub fn new(a: Button, b: Button, p: Target) -> Self {
     Self { a, b, target: p}
   }
 
-  pub fn run(&self) {
-    println!("Running {:?}", self);
-    panic!("not implemented")
+  pub fn run(&self) -> usize {
+    let cost_a = 3;
+    let cost_b= 1;
+    let mut results: Vec<usize> = Vec::new();
+
+    let max_a_presses = 100;
+    let max_b_presses = 100;
+
+    let mut times_pressing_a = 0;
+    let mut times_pressing_b = 0;
+
+    while times_pressing_a < max_a_presses {
+      times_pressing_b = 0;
+      while times_pressing_b < max_b_presses {
+
+        let a_result_x = self.a.x * times_pressing_a;
+        let a_result_y = self.a.y * times_pressing_a;
+        
+        let b_result_x = self.b.x * times_pressing_b;
+        let b_result_y = self.b.y * times_pressing_b;
+        
+        if a_result_x + b_result_x == self.target.x && a_result_y + b_result_y == self.target.y {
+          println!("Solution {} {}", times_pressing_a, times_pressing_b);
+          results.push(times_pressing_a * cost_a + times_pressing_b * cost_b);
+        } else {
+          //println!("Failed ({} * {}) != {} != {} AND ({} * {}) {} != {} ", self.a.x, times_pressing_a, a_result_x,  self.target.x, self.b.x, times_pressing_b, b_result_x, self.target.y)
+        }
+        times_pressing_b += 1;
+      }
+      times_pressing_a += 1;
+
+    }
+
+    println!("Results {:?}", results);
+
+    if results.len() > 0 {
+      return *results.iter().min().unwrap();
+    }
+
+    return 0;
     
   }
 }
@@ -114,7 +151,7 @@ fn parse_input(input: &str) {
 
       let button1 = Button::new(button1_x as usize, button1_y as usize);
       let button2 = Button::new(button2_x as usize, button2_y as usize);
-      let target = Target::new(target_x as usize, target_y as usize);
+      let target = Target::new((target_x * 10000000000000) as usize, (target_y * 10000000000000) as usize);
       let c = Competition::new(button1, button2, target);
 
       println!("{:?}", c);
@@ -123,21 +160,15 @@ fn parse_input(input: &str) {
 
   });
 
-
-  println!("{:?}", competitions);
+  let mut total_success = 0;
 
   competitions.iter().for_each(|competition|{
-    competition.run();
+    let result = competition.run();
+    println!("Result: {:?}", result);
+    total_success += result
   });
-  /*
-  raw_parts.for_each(|f|{
-    println!("XX {:?}", f)
-  });
-  */
 
-
-
-    
+  println!("Total Success {}", total_success)
     
 }
 
