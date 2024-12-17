@@ -1,7 +1,6 @@
 use std::fs;
 use std::env;
 use std::str::FromStr;
-use std::io;
 use aoc::lattice::Lattice;
 
 use crate::lattice;
@@ -33,7 +32,7 @@ fn read_file(filename: &str) -> String {
     let contents = fs::read_to_string(filename)
         .expect("Should have been able to read the file");
 
-    println!("Found text:\n{}", contents);
+    //println!("Found text:\n{}", contents);
     contents
 }
 
@@ -59,18 +58,18 @@ impl Robot {
     let y = self.p.y();
 
     if x >= width {
-      self.p.setX(x % width);
+      self.p.setX(x.rem_euclid(width));
     }
 
     if y >= height {
-      self.p.setY(y % height);
+      self.p.setY(y.rem_euclid(height));
     }
 
     if x < 0 {
-      self.p.setX(width + x);
+      self.p.setX(x.rem_euclid(width));
     }
     if y < 0 {
-      self.p.setY(height + y);
+      self.p.setY(y.rem_euclid(height));
     }
 
     //println!("After: {:?}", self.p);
@@ -82,12 +81,7 @@ fn count_robots_at_position(robots: &Vec<Robot>, x: i64, y: i64) -> usize {
 }
 
 fn print_grid_with_robots(robots: &Vec<Robot>, width: i64, height: i64) {
-  let mut grid = vec![vec!['.'; width as usize]; height as usize];
-
-  for robot in robots.iter() {
-    let count = count_robots_at_position(&robots, robot.p.x(), robot.p.y());
-    grid[robot.p.y() as usize][robot.p.x() as usize] = count.to_string().chars().next().unwrap();
-  }
+  let grid = make_grid(width, height, robots);
 
   println!();
   print!("col  ");
@@ -104,6 +98,32 @@ fn print_grid_with_robots(robots: &Vec<Robot>, width: i64, height: i64) {
   }
   println!();
 
+}
+
+fn make_grid_no_count(width: i64, height: i64, robots: &Vec<Robot>) -> Vec<Vec<char>> {
+  let mut grid = vec![vec!['.'; width as usize]; height as usize];
+
+  for robot in robots.iter() {
+      let count = count_robots_at_position(&robots, robot.p.x(), robot.p.y());
+      //println!("Robot at {:?} has {} robots, debug= {} {} ", robot.p, count, robot.p.y() as usize, robot.p.x() as usize);
+      let y= usize::try_from(robot.p.y()).unwrap();
+      let x= usize::try_from(robot.p.x()).unwrap();
+      grid[y][x] = if count > 0 { '#' } else { '.' };
+    }
+  grid
+}
+
+fn make_grid(width: i64, height: i64, robots: &Vec<Robot>) -> Vec<Vec<char>> {
+    let mut grid = vec![vec!['.'; width as usize]; height as usize];
+
+    for robot in robots.iter() {
+        let count = count_robots_at_position(&robots, robot.p.x(), robot.p.y());
+        //println!("Robot at {:?} has {} robots, debug= {} {} ", robot.p, count, robot.p.y() as usize, robot.p.x() as usize);
+        let y= usize::try_from(robot.p.y()).unwrap();
+        let x= usize::try_from(robot.p.x()).unwrap();
+        grid[y][x] = count.to_string().chars().next().unwrap();
+      }
+    grid
 }
 
 
@@ -146,42 +166,64 @@ fn parse_input(input: &str) -> Vec<Robot>{
 
 }
 
+fn check_middle_16_square_all_have_robots(grid: &Vec<Vec<char>>) -> bool {
+  let middle_x = grid[0].len() / 2;
+  let middle_y = grid.len() / 2;
+
+  let middle_squares = vec![
+    grid[middle_y - 1][middle_x - 1],
+    grid[middle_y - 1][middle_x],
+    grid[middle_y - 1][middle_x + 1],
+    grid[middle_y - 1][middle_x + 2],
+    grid[middle_y][middle_x - 1],
+    grid[middle_y][middle_x],
+    grid[middle_y][middle_x + 1],
+    grid[middle_y][middle_x + 2],
+    grid[middle_y + 1][middle_x - 1],
+    grid[middle_y + 1][middle_x],
+    grid[middle_y + 1][middle_x + 1],
+    grid[middle_y + 1][middle_x + 2],
+    grid[middle_y + 2][middle_x - 1],
+    grid[middle_y + 2][middle_x],
+    grid[middle_y + 2][middle_x + 1],
+    grid[middle_y + 2][middle_x + 2],
+  ];
+
+  let found = middle_squares.iter().all(|&c| c == '#');
+
+  found
+}
+
 pub fn main() {
+
+    // 8257 WINNER
+
     let content = read_file(get_filename_from_args().as_str());
 
     let mut robots = parse_input(content.as_str());   
 
-    /*
-    robots = Vec::from([
-      Robot::new(
-        Lattice::new(2, 4),
-        Lattice::new(2, -3)
-      )
-    ]);
-    */
-
     let width: i64 = 101;
     let height: i64 = 103;
-    let iterations = 200;
-
-    for robot in robots.iter_mut() {
-      robot.move_robot(200, width, height);
-    }
+    let initial_iterations = 0;
+    let iterations: i32 = 75000;
 
     print_grid_with_robots(&robots, width, height);
-    
-    for i in 0..iterations {
+
+    for i in initial_iterations..(iterations + initial_iterations) {
       for robot in robots.iter_mut() {
         robot.move_robot(1, width, height);
       }
-      println!("After {} second(s)", i + 1);
-      print_grid_with_robots(&robots, width, height);
-      let mut input = String::new();
-      match io::stdin().read_line(&mut input) {
-          Ok(n) => {
-              println!("Iteration {}", i);
-          }
-          Err(error) => println!("error: {error}"),
+      //println!("After {} second(s)", i + 1);
+      //print_grid_with_robots(&robots, width, height);
+
+      let grid = make_grid_no_count(width, height, &robots);
+      //let found = check_any_subgrid_of_size_has_robots_at_subgrid_of_size_X(&grid, 3);
+      let found = check_middle_16_square_all_have_robots(&grid);
+
+      if found {
+        print_grid_with_robots(&robots, width, height);
+        println!("Found symmetrical grid after {} iterations", i + 1);
+        break;
       }
     }
 
