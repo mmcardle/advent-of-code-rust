@@ -62,6 +62,21 @@ impl Competition {
     Self { a, b, target: p}
   }
 
+  pub fn run_part2(&self) -> usize {
+    let tx = self.target.x as f64 + 10000000000000.0 as f64;
+    let ty = self.target.y as f64 + 10000000000000.0 as f64;
+    let ay = self.a.y as f64;
+    let ax = self.a.x as f64;
+    let by = self.b.y as f64;
+    let bx = self.b.x as f64;
+    let bb = (tx*ay-ty*ax)/(ay*bx-by*ax);
+    let aa = (tx*by-ty*bx)/(by*ax-ay*bx);
+    if aa.fract() == 0.0 && bb.fract() == 0.0 {
+      return 3 * (aa as usize) + (bb as usize);
+    }
+    return 0;
+  }
+
   pub fn run(&self) -> usize {
     let cost_a = 3;
     let cost_b= 1;
@@ -151,7 +166,7 @@ fn parse_input(input: &str) {
 
       let button1 = Button::new(button1_x as usize, button1_y as usize);
       let button2 = Button::new(button2_x as usize, button2_y as usize);
-      let target = Target::new((target_x * 10000000000000) as usize, (target_y * 10000000000000) as usize);
+      let target = Target::new(target_x as usize, target_y as usize);
       let c = Competition::new(button1, button2, target);
 
       println!("{:?}", c);
@@ -161,14 +176,17 @@ fn parse_input(input: &str) {
   });
 
   let mut total_success = 0;
+  let mut total_success_part2 = 0;
 
   competitions.iter().for_each(|competition|{
     let result = competition.run();
-    println!("Result: {:?}", result);
-    total_success += result
+    let result2 = competition.run_part2();
+    println!("Result: {:?} {}", result, result2);
+    total_success += result;
+    total_success_part2 += result2;
   });
 
-  println!("Total Success {}", total_success)
+  println!("Total Success {} {}", total_success, total_success_part2)
     
 }
 
