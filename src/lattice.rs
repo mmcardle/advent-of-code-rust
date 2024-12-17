@@ -4,13 +4,13 @@ use std::ops::{Add, Mul, Neg, Sub};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Point {
-    pub x: i32,
-    pub y: i32,
+    pub x: i64,
+    pub y: i64,
 }
 
 impl Point {
 
-    pub fn new(x: i32, y: i32) -> Self {
+    pub fn new(x: i64, y: i64) -> Self {
         Self { x, y }
     }
 }
@@ -26,12 +26,21 @@ impl Lattice {
         Self { real, imag }
     }
 
-    pub fn x(&self) -> i32 {
-        self.real as i32
+
+    pub fn x(&self) -> i64 {
+        self.real
     }
 
-    pub fn y(&self) -> i32 {
-        self.imag as i32
+    pub fn y(&self) -> i64 {
+        self.imag
+    }
+
+    pub fn setX(&mut self, x: i64) {
+        self.real = x;
+    }
+
+    pub fn setY(&mut self, y: i64) {
+        self.imag = y;
     }
 
     pub fn is_real(&self) -> bool {
@@ -65,7 +74,7 @@ impl Lattice {
         }
     }
 
-    pub fn to_tuple(&self) -> (i32, i32) {
+    pub fn to_tuple(&self) -> (i64, i64) {
         (self.x(), self.y())
     }
 
@@ -91,7 +100,7 @@ impl Lattice {
         result
     }
 
-    pub fn manhattan(a: Self, b: Self) -> i32 {
+    pub fn manhattan(a: Self, b: Self) -> i64 {
         (a.x() - b.x()).abs() + (a.y() - b.y()).abs()
     }
 
