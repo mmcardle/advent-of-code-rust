@@ -35,11 +35,11 @@ impl Lattice {
         self.imag
     }
 
-    pub fn setX(&mut self, x: i64) {
+    pub fn set_x(&mut self, x: i64) {
         self.real = x;
     }
 
-    pub fn setY(&mut self, y: i64) {
+    pub fn set_y(&mut self, y: i64) {
         self.imag = y;
     }
 

@@ -1,7 +1,7 @@
 
 pub mod lattice;
-pub mod day14;
+pub mod day16;
 
 pub fn main() {
-  day14::main();
+  day16::main();
 }

@@ -58,7 +58,7 @@ impl Robot {
     let y = self.p.y();
 
     if x >= width {
-      self.p.setX(x.rem_euclid(width));
+      self.p.set_x(x.rem_euclid(width));
     }
 
     if y >= height {
@@ -66,7 +66,7 @@ impl Robot {
     }
 
     if x < 0 {
-      self.p.setX(x.rem_euclid(width));
+      self.p.set_x(x.rem_euclid(width));
     }
     if y < 0 {
       self.p.setY(y.rem_euclid(height));
