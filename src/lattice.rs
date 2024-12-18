@@ -51,6 +51,22 @@ impl Lattice {
         self.real == 0
     }
 
+    pub fn north(&self) -> Self {
+        Self::new(self.real, self.imag - 1)
+    }
+
+    pub fn south(&self) -> Self {
+        Self::new(self.real, self.imag + 1)
+    }
+
+    pub fn east(&self) -> Self {
+        Self::new(self.real + 1, self.imag)
+    }
+
+    pub fn west(&self) -> Self {
+        Self::new(self.real - 1, self.imag)
+    }
+
     pub fn direction(&self, other: &Self) -> Lattice {
         let diff = *other - *self;
         let mut result = Lattice::new(0, 0);
